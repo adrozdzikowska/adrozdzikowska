@@ -1,0 +1,97 @@
+---
+title: "Title"
+output:
+  html_document:
+    css: style_html.css
+    self_contained: false
+    includes:
+      after_body: footer.html
+
+---
+
+```{r setup1, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE)
+
+knitr::knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=" ", decimal.mark = ",")
+})
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(data.table)
+library(highcharter)
+
+# Palette:
+rainbowcols <- rainbow(6)
+```
+
+
+<!---------------------------------------------------------------------------------->
+<!--                        Introduction                                          -->
+<!---------------------------------------------------------------------------------->
+
+## {.tabset}
+
+Sample visualizations.
+
+<details>
+
+<summary> About visualizations (Click here to read more) </summary> 
+
+Visializations:
+
+<ul>
+
+  <li>Plot 1 - Spline plot</li> 
+  <li>Plot 2 - Column plot</li> 
+	
+</ul>
+
+</details>
+<br>
+
+<!---------------------------------------------------------------------------------->
+<!--                          Visualizations                                      -->
+<!---------------------------------------------------------------------------------->
+
+### Plot 1 
+```{r}
+# ----- Example data:
+data_but1_1 <- data.table::data.table("year" = c(2015:2020),
+                          "value" = sample(150:200, 36, replace = FALSE),
+                          "week" = rep(c(01:06), each = 6))
+
+# ----- Plot:
+highcharter::hchart(data_but1_1, "spline", hcaes(x = week, y = value, group = year), color =  rainbowcols, name = "Value") %>% 
+  highcharter::hc_add_theme(hc_theme_smpl()) %>%
+  highcharter::hc_xAxis(min = 1, max = 6, tickInterval = 1, title = list(text = "Week")) %>%
+  highcharter::hc_yAxis(title = list(text = "Value")) %>%
+  highcharter::hc_chart(zoomType = "x") %>%
+  highcharter::hc_exporting(enabled = TRUE, filename = "Plot_values") %>%
+  highcharter::hc_title(text = paste0( "Values in years ", min(data_but1_1$year),"-", max(data_but1_1$year))) %>%
+  highcharter::hc_tooltip(valueDecimals = 0) %>%
+  highcharter::hc_credits(enabled = TRUE, text = "Source: own analysis")
+```
+
+### Plot 2
+```{r}
+# ----- Example data:
+data_but1_2 <- data_but1_1[, .("value_sum" = sum(value)), by = year]
+
+# ----- Plot:
+highcharter::hchart(data_but1_2, "column", hcaes(x = year, y = value_sum, color = rainbowcols), name = "Cumulative value") %>% 
+  highcharter::hc_add_theme(hc_theme_smpl()) %>% 
+  highcharter::hc_xAxis(title = list(text = "Year"), categories = sort(unique(data_but1_2$year))) %>% 
+  highcharter::hc_yAxis(title = list(text = "Value"))%>% 
+  highcharter::hc_title(text = "Cumulative values") %>%
+  highcharter::hc_exporting(enabled = TRUE, filename = "Plot_cumulative_values") %>%
+  highcharter::hc_subtitle(text = "By years") %>% 
+  highcharter::hc_tooltip(valueDecimals = 0) %>% 
+  highcharter::hc_yAxis(min = 0, max =  max(data_but1_2$value_sum)) %>%
+  highcharter::hc_credits(enabled = TRUE, text = "Source: own analysis")
+```
+

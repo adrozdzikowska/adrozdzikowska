@@ -1,0 +1,26 @@
+name: " "
+output_dir: "."
+navbar:
+   type: default
+   left:
+    - text: "TEST R MARKDOWN" 
+      href: index.html
+    - text: "BUTTON 1"
+      menu: 
+        - text: "SUB_BUTTON 1"
+          href: button1_1.html
+        - text: "SUB_BUTTON 2"
+          href: button1_2.html 
+    - text: "BUTTON 2" 
+      href: button2.html
+output:
+  html_document:
+    theme: flatly
+    highlight: tango
+    fig_width: 8
+    fig_height: 3
+    css: style_html.css
+    self_contained: false
+    includes:
+        after_body: footer.html 
+        

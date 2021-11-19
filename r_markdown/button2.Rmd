@@ -1,0 +1,113 @@
+---
+title: "Title"
+output:
+  html_document:
+    css: style_html.css 
+    self_contained: false
+    includes:
+      after_body: footer.html
+
+---
+
+```{r setup4, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE)
+knitr::knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=" ", decimal.mark = ",")
+})
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(data.table)
+library(highcharter)
+library(ggplot2)
+library(DT)
+
+# Palette:
+rainbowcols <- rainbow(6)
+```
+
+<!---------------------------------------------------------------------------------->
+<!--                        Introduction                                          -->
+<!---------------------------------------------------------------------------------->
+
+Sample visualizations.
+
+<details>
+
+<summary> About visualizations (Click here to read more) </summary> 
+
+Visializations:
+
+<ul>
+
+  <li>Plot 1 - Bar plot</li>
+  <li>Plot 2 - Table</li>
+  <li>Plot 2 - Tree map</li> 
+
+</ul>
+
+</details>
+<br>
+
+<!---------------------------------------------------------------------------------->
+<!--                          Visualizations                                      -->
+<!---------------------------------------------------------------------------------->
+
+## {.tabset .tabset-fade .tabset-dropdown}
+
+### First  {.tabset .tabset-fade .tabset-pills .smaller}
+
+#### Plot
+```{r}
+# ----- Example data:
+data_but3_1 <- data.table::data.table("mc" = c("1", "2", "3" ,"4"),
+                                      "group_A" = sample(150:200, 4, replace=FALSE),
+                                      "group_B" = sample(150:200, 4, replace=FALSE))
+
+
+# ----- Plot:
+highcharter::highchart() %>% 
+  highcharter::hc_chart(type = "column") %>%
+  highcharter::hc_plotOptions(column = list(stacking = "normal")) %>%
+  highcharter::hc_title(text = paste0("Number of people"),
+                        align = "left", style = list(fontWeight = "bold", fontFamily = "Roboto Condensed", color = "#000000")) %>%
+  highcharter::hc_plotOptions(column = list(stacking = "normal")) %>%
+  highcharter::hc_yAxis(title = list(text = paste0("Number of people"))) %>%
+  highcharter::hc_chart(zoomType = "x") %>%
+  highcharter::hc_exporting(enabled = TRUE, filename = "Plot_bar") %>%
+  highcharter::hc_xAxis(categories = data_but3_1$mc) %>%
+  highcharter::hc_add_series(name = "1. group",  color = rainbowcols[1],
+                             data = data_but3_1$group_A,
+                             stack = "Group A") %>%
+  highcharter::hc_add_series(name = "2. group", color = rainbowcols[2],
+                             data = data_but3_1$group_B,
+                             stack = "Group B") %>%
+  highcharter::hc_tooltip(valueDecimals = 0) %>%
+  highcharter::hc_credits(enabled = TRUE, text = "Source: own analysis")
+```
+
+#### Table
+```{r}
+# ----- Table:
+DT::datatable(data_but3_1, rownames = F)
+```
+
+### Second {.tabset .tabset-fade .tabset-pills .smaller}
+```{r}
+# ----- Example data:
+data("mpg", package = "ggplot2")
+mpg <- as.data.table(mpg)
+table_summary <- mpg[, list(nb_model= length(unique(model)), nb_cars = .N), by = manufacturer]
+
+# ----- Plot:
+table_summary %>%
+  highcharter::hchart("treemap", 
+                      hcaes(x = manufacturer, value = nb_cars, color = nb_model)) %>%
+  highcharter::hc_title(text = "Tree map",
+                        align = "left", style = list(fontWeight = "bold", fontFamily = "Roboto Condensed", color = "#000000"))  %>%
+  highcharter::hc_credits(enabled = TRUE, text = "Source: own analysis") %>%
+  highcharter::hc_exporting(enabled = TRUE, filename = "Plot_bar") 
+```

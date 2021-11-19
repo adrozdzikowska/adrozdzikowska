@@ -1,0 +1,180 @@
+---
+title: "Title"
+output:
+  html_document:
+    css: style_html.css
+    self_contained: false
+    includes:
+      after_body: footer.html
+
+---
+
+```{r setup2, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE)
+knitr::knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=" ", decimal.mark = ",")
+})
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(data.table)
+library(highcharter)
+
+# Palette:
+rainbowcols <- rainbow(5)
+```
+
+
+<!---------------------------------------------------------------------------------->
+<!--                        Introduction                                          -->
+<!---------------------------------------------------------------------------------->
+
+Sample visualizations
+
+<details>
+
+<summary> About visualizations (Click here to read more) </summary> 
+
+Visializations:
+
+<ul>
+
+  <li>Plot 1 - Area plot</li> 
+  <li>Plot 2 - Pie chart</li> 
+
+</ul>
+
+</details>
+<br>
+
+
+<!---------------------------------------------------------------------------------->
+<!--                          Visualizations                                      -->
+<!---------------------------------------------------------------------------------->
+
+## {.tabset .tabset-fade .tabset-pills .smaller}
+
+### Button 1
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# ----- Example data:
+data_but2_1 <- data.table::data.table("year" = c(2009:2015),
+                                      "Class_A" = sample(100:200, 7),
+                                      "Class_B" = sample(200:300, 7),
+                                      "Class_C" = sample(300:400, 7))
+
+# ----- Plot:
+highcharter::highchart() %>%
+  highcharter::hc_chart(type = "area") %>%
+  highcharter::hc_title(text = "Number of products",
+                       align = "left", style = list(fontWeight = "bold", fontFamily = "Roboto Condensed", color = "#000000" )) %>%
+  highcharter::hc_subtitle(text = "Broken down into classes", align = "left") %>%
+  highcharter::hc_xAxis(categories = data_but2_1$year,
+                       tickmarkPlacement = "on",
+                       title = list(enabled = FALSE)) %>%
+  highcharter::hc_yAxis(title = list(text = "Value")) %>%
+  highcharter::hc_tooltip(pointFormat = "<span style=\"color:{series.color}\">{series.name}</span>:
+             <b>{point.percentage:.1f}%</b> ({point.y:,.0f} in numbers)<br/>",
+             shared = TRUE) %>%
+  highcharter::hc_plotOptions(area = list(
+    stacking = "percent",
+    lineColor = "#ffffff",
+    lineWidth = 1,
+    marker = list(
+      lineWidth = 1,
+      lineColor = "#ffffff"
+    ))) %>%
+  highcharter::hc_add_series(name = "Class A", data = data_but2_1$Class_A, color = rainbowcols[4]) %>%
+  highcharter::hc_add_series(name = "Class B", data = data_but2_1$Class_B, color = rainbowcols[5]) %>%
+  highcharter::hc_add_series(name = "Class C", data = data_but2_1$Class_C, color = rainbowcols[6]) %>%
+  highcharter::hc_credits(enabled = TRUE, text = "Source: own analysis") %>%
+  highcharter::hc_exporting(enabled = TRUE, filename = "Plot_classes") %>% 
+  highcharter::hc_tooltip(crosshairs = TRUE)  
+```
+
+### Button 2
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+# ----- Example data:
+df <- data.frame(
+  name = c("Animals", "Fruits", "Cars"),
+  y = c(5, 2, 4),
+  drilldown = c("Animals", "Fruits", "Cars"),
+  pal_colours = rainbowcols[1:3] 
+)
+
+dfan <- data.frame(
+  name = c("Cats", "Dogs", "Cows", "Sheep", "Pigs"),
+  value = c(4, 3, 1, 2, 1),
+  pal_colours = rainbowcols[1:5] 
+)
+
+dffru <- data.frame(
+  name = c("Apple", "Organes"),
+  value = c(4, 2),
+  pal_colours = rainbowcols[1:2]
+)
+
+dfcar <- data.frame(
+  name = c("Toyota", "Opel", "Volkswagen"),
+  value = c(4, 2, 2),
+  procent = c(0.4, 0.2, 0.2),
+  pal_colours = rainbowcols[1:3]
+)
+
+# ----- Plot:
+hc <- highcharter::highchart() %>%
+  highcharter::hc_chart(type = "pie") %>%
+  highcharter::hc_title(text = "Basic drilldown") %>%
+  highcharter::hc_xAxis(type = "category") %>%
+  highcharter::hc_legend(enabled = FALSE) %>%
+  highcharter::hc_plotOptions(
+    series = list(
+      boderWidth = 0,
+      dataLabels = list(enabled = TRUE))) %>%
+  highcharter::hc_add_series(
+    data = df,
+    name = "general pie",
+    colors = df$pal_colours, 
+    colorByPoint = TRUE) %>%    
+  highcharter::hc_tooltip(crosshairs = TRUE, borderWidth = 5, sort = TRUE, shared = TRUE, table = F,
+             pointFormat = paste('<span style="color:{point.color}">\u25CF</span> <b> {point.name}: {point.percentage: .1f}%</b> ({point.y:,.0f} in numbers)<br/>')) 
+
+
+hc %>%
+  highcharter::hc_drilldown(
+    allowPointDrilldown = TRUE,
+    drillUpButton = list(
+      position = list(x = 0, y = 60)),
+    series = list(
+      list(
+        id = "Animals", 
+        data = list_parse2(dfan),
+        colors = dfan$pal_colours,
+        dataLabels = list(enabled = TRUE)
+        , tooltip = list(
+          pointFormat = paste('<span style="color:{point.color}">\u25CF</span> <b> {point.name}: <b> {point.percentage: .1f}%</b> ({point.y:,.0f} in numbers)<br/>'))
+      ),  list(
+        id = "Fruits",
+        data = list_parse2(dffru),
+        colors = dffru$pal_colours,
+        dataLabels = list(enabled = TRUE)
+        , tooltip = list(
+          pointFormat = paste('<span style="color:{point.color}">\u25CF</span> <b> {point.name}: <b> {point.percentage: .1f}%</b> ({point.y:,.0f} in numbers)<br/>') )
+      ), list(
+        id = "Cars",
+        data = list_parse2(dfcar),
+        colors = dfcar$pal_colours,
+        dataLabels = list(enabled = TRUE)
+        , tooltip = list(
+          pointFormat = paste('<span style="color:{point.color}">\u25CF</span> <b> {point.name}: <b> {point.percentage: .1f}%</b> ({point.y:,.0f} in numbers)<br/>'))
+      )
+    )
+  )  %>%
+  highcharter::hc_credits(enabled = TRUE, text = "Source: own analysis") %>%
+  highcharter::hc_title(text = "Values in categories", align = "left", style = list(fontWeight = "bold", fontFamily = "Roboto Condensed", color = "#000000"))  %>%
+  highcharter::hc_exporting(enabled = TRUE, filename = "Pie_chart") %>% 
+  highcharter::hc_tooltip(crosshairs = TRUE)  %>% 
+  highcharter::hc_subtitle(text = "Click on pie chart for more details",align = "left")
+```

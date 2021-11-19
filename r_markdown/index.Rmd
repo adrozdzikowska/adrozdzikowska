@@ -1,0 +1,20 @@
+---
+title: "Title"
+output:
+  html_document:
+    css: style_html.css
+    self_contained: false
+    includes:
+      after_body: footer.html
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+**Exaple R markdown raport**
+
+Text
