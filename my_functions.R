@@ -75,3 +75,47 @@ add_gAGE <- function(dt,
 # dt_example2 = data.table("AGE" = c(5, 40, 110))
 # 
 # add_gAGE(dt = dt_example2)
+
+
+### -------------------------------    Function create_pathways()     ------------------------------
+
+#' @title Function create_pathways
+#' @param dt data.table with columns: ID_PERSON, TYPE, DATE
+#' @param simplify logical vector, when TURE it simplifies paths - groups multiple occurrences of the same type into one instance, default is FALSE
+#'
+#' @return patient paths (by unique ID_PERSON) in successive types (TYPE) over time (DATE)
+#' @export
+#'
+#' @examples
+create_pathways <- function(dt, simplify = FALSE){
+  
+  indispensable <- c("ID_PERSON", "TYPE", "DATE")
+  tryCatch(stopifnot(all(indispensable %in% names(dt))),
+           error = function(e) stop(paste0("Missing columns: ", 
+                                           stringr::str_c(setdiff(indispensable, names(dt)), collapse = ", "))))
+  
+  tryCatch(stopifnot(inherits(dt$DATE, "Date")),
+           error = function(e) stop("Column DATE must be class Date"))
+  
+  dt <- data.table(dt)
+  dt_path <- dt[order(ID_PERSON, TYPE, DATE)]
+  
+  paths <- unique(dt_path[, ':=' (count = .N, min_date = min(DATE),
+                                  path = stringr::str_c(TYPE, collapse = " -> ")), 
+                          by = ID_PERSON][, -c("DATE", "TYPE")])[, nodes := stringr::str_split(path, " -> ")]
+  
+  if (simplify) {
+    paths$nodes <- lapply(paths$nodes, function(x){x[x != shift(x, n = 1, type = "lag", fill = "")]})
+    paths$path <- unlist(lapply(paths$nodes, function(x) {stringr::str_c(x, collapse = " -> ")}))
+  }
+  
+  return(paths)
+}
+
+# # Use:
+# dt_example3 = data.table("ID_PERSON" = c( 1, 1, 2),
+#                          "TYPE" = c("a", "a", "c"),
+#                          "DATE" = c(as.Date("2020-02-02"), as.Date("2021-02-03"), as.Date("2021-09-03")))
+# 
+# paths <- create_pathways(dt = dt_example3)
+# paths
