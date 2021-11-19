@@ -87,7 +87,9 @@ add_gAGE <- function(dt,
 #' @export
 #'
 #' @examples
-create_pathways <- function(dt, simplify = FALSE){
+create_pathways <- function(dt, 
+                            simplify = FALSE)
+{
   
   indispensable <- c("ID_PERSON", "TYPE", "DATE")
   tryCatch(stopifnot(all(indispensable %in% names(dt))),
