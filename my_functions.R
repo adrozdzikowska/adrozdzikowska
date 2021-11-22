@@ -27,7 +27,6 @@ repair_mistakes <- function(dt)
     
     dt <- dt[as.numeric(AGE) <= 110]
     dt <- dt[SEX %in% c("Male", "Female")]
-    dt <- dt[!ID %in% bad_age$ID]
   } 
   
   return(dt)
